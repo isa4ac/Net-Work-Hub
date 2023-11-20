@@ -45,7 +45,7 @@ def openports_currentrange():
 
     with open('portscan.xml') as raw_xml:
         nmap_scan = xmltodict.parse(raw_xml.read())
-        print(nmap_scan)
+        print(jsonify(nmap_scan))
 
     return parseNmapData(json.loads(jsonify(nmap_scan)))
 
