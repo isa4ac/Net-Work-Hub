@@ -39,6 +39,7 @@ function func_job_business_list_active($data) {
                 'define_Job_Status_Name' => $objActiveJob->define_Job_Status_Name,
                 'jobDetail_Posted_DT' => ($objActiveJob->jobDetail_Posted_DT) ? date("d M, Y", strtotime($objActiveJob->jobDetail_Posted_DT)) : '',
                 'jobDetail_Title' => $objActiveJob->jobDetail_Title,
+                'jobDetail_Description' => $objActiveJob->jobDetail_Description_from_Business,
                 'jobDetail_Proposal_Target_Budget' => $objActiveJob->jobDetail_Proposal_Target_Budget,
                 'jobDetail_Proposal_Target_Date' => ($objActiveJob->jobDetail_Proposal_Target_Date) ? date("d M, Y", strtotime($objActiveJob->jobDetail_Proposal_Target_Date)) : '',
                 'jobDetail_Proposal_Agreed_Budget' => $objActiveJob->jobDetail_Proposal_Agreed_Budget,
