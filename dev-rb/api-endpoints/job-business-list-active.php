@@ -53,6 +53,10 @@ function func_job_business_list_active($data) {
             ];
         }
 
+        if ($data['flatten'] == 'true') {
+            return $arrReturn;
+        }
+
         return [
             'success' => true,
             'data' => $arrReturn
