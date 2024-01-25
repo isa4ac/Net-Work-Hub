@@ -19,11 +19,18 @@ function func_job_business_remove($data) {
 
     global $clsJobDetails;
 
-    $boolAdded = $clsJobDetails->removeJob( $data['job_id'] );
+    $success = $clsJobDetails->removeJob( $data['job_id'] );
 
-    return [
-        'success' => true,
-        'message' => 'Job has been removed'
-    ];
+    if ($success) {
+        return [
+            'success' => true,
+            'message' => 'Job has been removed'
+        ];
+    } else {
+        return [
+            'success' => false,
+            'message' => 'Error removing job'
+        ];
+    }
 
 }

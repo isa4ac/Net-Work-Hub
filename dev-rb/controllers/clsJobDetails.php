@@ -55,6 +55,13 @@ class clsJobDetails
         return true;
     }
 
+    function removeJob( $id ) {
+        global $wpdb;
+        return $wpdb->delete( $this->table, [
+            "jobDetail_Id_PK" => $id
+        ] );
+    }
+
     function getActiveJobs($intUserId) {
 
         global $wpdb, $clsDefineJobStatus;
