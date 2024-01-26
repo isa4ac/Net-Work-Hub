@@ -31,7 +31,7 @@ function func_job_business_post($data) {
         "jobDetail_Description_from_Business" => $data['job_description'],
         "jobDetail_Description_from_Engineer" => "",
         "jobDetail_Proposal_Target_Budget" => $data['target_budget'],
-        "jobDetail_Proposal_Target_Date" => $data['target_date']
+        "jobDetail_Proposal_Target_Date" => date("Y-m-d H:i:s", strtotime($data['target_date']))
     ]);
 
     if ($boolAdded)
