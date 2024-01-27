@@ -33,6 +33,19 @@ function func_job_business_list_active($data) {
                 $jobDetail_Engineer_UserId_FK = $objUser->display_name;
             }
 
+            // do not want to return 'null'
+            if(is_null($objActiveJob->jobDetail_Proposal_Target_Budget) || empty($objActiveJob->jobDetail_Proposal_Target_Budget)){
+                $objActiveJob->jobDetail_Proposal_Target_Budget = "0";
+            }
+
+            if(is_null($objActiveJob->jobDetail_Proposal_Agreed_Budget) || empty($objActiveJob->jobDetail_Proposal_Agreed_Budget)){
+                $objActiveJob->jobDetail_Proposal_Agreed_Budget = "0";
+            }
+
+            if(is_null($objActiveJob->jobDetail_Proposal_Final_Budget) || empty($objActiveJob -> jobDetail_Proposal_Final_Budget)){
+                $objActiveJob->jobDetail_Proposal_Final_Budget = "0";
+            }
+
             $arrReturn[] = [
                 'jobDetail_Id_PK' => $objActiveJob->jobDetail_Id_PK,
                 'jobDetail_Engineer_UserId_FK' => $jobDetail_Engineer_UserId_FK,
@@ -69,8 +82,4 @@ function func_job_business_list_active($data) {
             'message' => "No active jobs found"
         ];
     }
-
-
-    
-
 }

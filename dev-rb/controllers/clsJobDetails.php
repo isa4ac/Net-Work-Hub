@@ -50,9 +50,23 @@ class clsJobDetails
 
     function addJobDetails( $data ) {
         global $wpdb;
-        $wpdb->insert( $this->table, $data );
+        return $wpdb->insert( $this->table, $data );
+    }
 
-        return true;
+    function editJobDetails( $data ) {
+        global $wpdb;
+        return $wpdb->update (
+            $this->table, // table being updated
+            $data, // row data
+            array('jobDetail_Id_PK' => $data["jobDetail_Id_PK"]) // where
+        );
+    }
+
+    function removeJob( $id ) {
+        global $wpdb;
+        return $wpdb->delete( $this->table, [
+            "jobDetail_Id_PK" => $id
+        ] );
     }
 
     function getActiveJobs($intUserId) {

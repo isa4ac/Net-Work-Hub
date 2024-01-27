@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="MariaDB" uuid="65784688-5d0b-4465-ac7e-1b5ea48e90e6">
+    <data-source source="LOCAL" name="wordpress-3138390e69@mysql.us.stackcp.com" uuid="65784688-5d0b-4465-ac7e-1b5ea48e90e6">
       <driver-ref>mariadb</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mariadb://mysql.us.stackcp.com:61781:3306/wordpress-313931ba0f</jdbc-url>
+      <jdbc-url>jdbc:mariadb://mysql.us.stackcp.com:58926/wordpress-3138390e69</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
