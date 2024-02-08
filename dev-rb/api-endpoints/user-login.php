@@ -19,29 +19,33 @@ function func_user_login($data) {
 
     global $clsUserData;
 
-    $objResponse = $clsUserData->checkUserLogin( $data['username'], $data['password'] );
-    $objResponse = json_decode($objResponse);
-
-    if ($objResponse->success)
-    {
-        return [
-            'success' => true,
-            'user' => $objResponse->user,
-            'username' => $data['username'],
-            'password' => $data['password']
-        ];
-    }
-    else
-    {
-        return [
-            'success' => false,
-            'message' => $objResponse->message,
-            'username' => $data['username'],
-            'password' => $data['password']
-        ];
-    }
 
 
-    
+    $objResponse = $clsUserData->attemptLogin( $data['email'], $data['pw'] );
+//    $objResponse = json_decode($objResponse);
 
+    return $objResponse;
+
+//    if ($objResponse->success)
+//    {
+//        if ($data['flatten'] == 'true') {
+//            return $objResponse['user']['data'];
+//        } else {
+//            return [
+//                'success' => true,
+//                'user' => $objResponse->user,
+//                'username' => $data['username'],
+//                'password' => $data['password']
+//            ];
+//        }
+//    }
+//    else
+//    {
+//        return [
+//            'success' => false,
+//            'message' => $objResponse->message,
+//            'username' => $data['username'],
+//            'password' => $data['password']
+//        ];
+//    }
 }
