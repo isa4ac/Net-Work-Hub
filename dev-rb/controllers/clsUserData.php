@@ -79,22 +79,36 @@ class clsUserData
     function checkUserLogin($username, $password) {
         $user = wp_authenticate_username_password(null, $username, $password);
         
-        if ( is_wp_error( $user ) ) 
-        {
+        if ( is_wp_error( $user ) )  {
             $error_string = $user->get_error_message();
             return json_encode([
                 'success' => false,
                 'message' => $error_string
             ]);
-        }
-        else
-        {
+        } else { // success:
             return json_encode([
                 'success' => true,
                 'user' => $user
             ]);
         }
 
+    }
+
+    function attemptLogin($email, $pw) {
+        global $wpdb;
+
+        $query = "SELECT userData_WordPress_UserId_FK, userData_Define_Role_Id_FK, userData_Timezone, userData_Primary_Email, userData_Name_First, userData_Name_Last, userData_Name_Business, userData_Profile_Description" .
+        " FROM {$this->table}" .
+        " WHERE userData_Primary_Email = '{$email}' AND userData_Password = '{$pw}' LIMIT 1";
+        $arrUserData = $wpdb->get_results(
+            $wpdb->prepare($query, [$email, $pw])
+        );
+//        return $arrUserData;
+        if ($arrUserData) {
+            return $arrUserData[0];
+        } else {
+            return $query;
+        }
     }
 
     function get_records() {
@@ -118,7 +132,6 @@ class clsUserData
         else
             return false;
     }
-
 }
 
 global $clsUserData;
