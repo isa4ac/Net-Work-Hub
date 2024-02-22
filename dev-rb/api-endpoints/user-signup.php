@@ -28,20 +28,9 @@ function func_user_register($data) {
     global $clsUserData, $clsNetworkHub;
 
     $userData_Id_PK = $clsNetworkHub->generate_uuid("user-data-");
-
-//    $wpUserId = wp_insert_user([
-//        'user_pass' => $data['pw'],
-//        'user_login' => $data['email'],
-//        'user_email' => $data['email'],
-//        'first_name' => $data['first'],
-//        'last_name' => $data['last']
-//    ]);
-
-//    update_user_meta($wpUserId, "uuid_key", $userData_Id_PK);
     
     $clsUserData->addUserData([
         "userData_Id_PK" => $userData_Id_PK,
-        "userData_WordPress_UserId_FK" => 0,
         "userData_Define_Role_Id_FK" => 'role-business',
         "userData_Primary_Email" => $data['email'],
         "userData_Password" => $data['pw'],
