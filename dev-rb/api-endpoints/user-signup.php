@@ -10,6 +10,14 @@ add_action('rest_api_init', function(){
         'callback' => 'func_user_register',             // call back function to do the required task
     ) );
 
+    // pass in:
+    // email
+    // pw
+    // first
+    // last
+    // bname
+    // bio
+
 });
 
 /*
@@ -20,39 +28,24 @@ function func_user_register($data) {
     global $clsUserData, $clsNetworkHub;
 
     $userData_Id_PK = $clsNetworkHub->generate_uuid("user-data-");
-
-    $wpUserId = wp_insert_user([
-        'user_pass' => $data['password'],
-        'user_login' => $data['email'],
-        'user_email' => $data['email'],
-        'first_name' => $data['firstname'],
-        'last_name' => $data['lastname'],
-        'role' => $data['role']
-    ]);
-
-    update_user_meta($wpUserId, "uuid_key", $userData_Id_PK);
     
-    $userId = $clsUserData->addUserData([
+    $clsUserData->addUserData([
         "userData_Id_PK" => $userData_Id_PK,
-        "userData_WordPress_UserId_FK" => $wpUserId,
-        "userData_Define_Role_Id_FK" => $data['define_Role_Id_PK'],
-        "userData_Timezone" => $data['userData_Timezone'],
+        "userData_Define_Role_Id_FK" => 'role-business',
         "userData_Primary_Email" => $data['email'],
-        "userData_Password" => md5($data['password']),
-        "userData_Name_Preferred" => $data['name_preferred'],
-        "userData_Name_First" => $data['firstname'],
-        "userData_Name_Last" => $data['lastname'],
-        "userData_Name_Business" => $data['business_name'],
-        "userData_Profile_Description" => $data['profile_description'],
-        "userData_is_Enabled" => $data['is_enabled'],
+        "userData_Password" => $data['pw'],
+        "userData_Name_Preferred" => $data['first'],
+        "userData_Name_First" => $data['first'],
+        "userData_Name_Last" => $data['last'],
+        "userData_Name_Business" => $data['bname'],
+        "userData_Profile_Description" => $data['bio'],
         "userData_DT_Added" => date("Y-m-d H:i:s")
     ]);
 
 
     # return response in json;
     return [
-        'success' => true,
-        'data' => $wpUserId
+        'success' => true
     ];
 
 }
