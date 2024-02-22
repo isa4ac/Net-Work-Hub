@@ -1,52 +1,43 @@
-import json
-import xmltodict
-from subprocess import run
 from flask import Flask, jsonify
+import nmap
+
 app = Flask(__name__)
 
-def parsePortData(port):
-    result = []
-    ports = port['port']
-
-    for portData in ports:
-        result.append(portData)
-
-    return result
-
-def parseHostData(hosts):
+def port_scan():
+    nm = nmap.PortScanner()
+    nm.scan(hosts='192.168.1.0/24') #todo make this ip not hardcoded
     results = []
-    index = 0
-    for host in hosts:
-        result = dict()
-        result['hostid'] = index
-        result['address'] = host['address']
-        result['hostnames'] = host['hostnames']
-        result['ports'] = parsePortData(host['ports'])
-        results.append(result)
-        index += 1
+
+    for host in nm.all_hosts():
+        host_data = {
+            'host': host,
+            'hostname': nm[host].hostname(),
+            'state': nm[host].state()
+        }
+
+        if 'tcp' in nm[host]:
+            host_data['ports'] = list(nm[host]['tcp'].keys())
+        else:
+            host_data['ports'] = []
+
+        results.append(host_data)
 
     return results
 
-def parseNmapData(data):
-    result = dict()
+@app.route('/')
+def index():
+    return """
+    <p>networkHub API :p</p>
+    <a href="/scan">scan</a>
+    """
 
-    result['args'] = data['@args']
-    result['startstr'] = data['@startstr']
-    result['host'] = parseHostData(data['host'])
-    result['runstats'] = data['runstats']
-
-    return result
-
-@app.route('/openports')
-def openports_currentrange():
-    """scan host"""
-
-    run(['nmap', '--open', '-oX', 'portscan.xml', '10.10.10.0/24'])
-
-    with open('portscan.xml') as raw_xml:
-        nmap_scan = xmltodict.parse(raw_xml.read())
-
-    return parseNmapData(jsonify(nmap_scan))
+@app.route('/scan')
+def scan():
+    try:
+        scan_results = port_scan()
+        return jsonify(scan_results)
+    except Exception as err:
+        return jsonify({'error': str(err)}), 500
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0') #makes available on local network
