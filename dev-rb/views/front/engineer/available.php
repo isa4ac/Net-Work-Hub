@@ -41,7 +41,7 @@ else
                         <?php 
                         if (!empty($objJob->jobDetail_Business_UserId_FK))
                         {
-                            $objUser = $clsUserData->getUserDataByWPUserId($objJob->jobDetail_Business_UserId_FK);
+                            $objUser = $clsUserData->getUserDataByUserId($objJob->jobDetail_Business_UserId_FK);
                             echo $objUser->userData_Name_Business;
                         }
                         ?>

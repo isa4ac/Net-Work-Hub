@@ -2,7 +2,7 @@
 wp_enqueue_style( 'datatable_style' );
 wp_enqueue_script( 'datatable_script' );
 
-global $clsJobDetails, $clsUserData;
+global $clsJobDetails, $clsUserData; // TODO : WE NEED TO MAKE OUR OWN get_current_user_id()
 $arrJobsEngineerFinished = $clsJobDetails->getJobsEngineerFinished( get_current_user_id() );
 
 
@@ -44,7 +44,7 @@ else
                         <?php 
                         if (!empty($objJob->jobDetail_Business_UserId_FK))
                         {
-                            $objUser = $clsUserData->getUserDataByWPUserId($objJob->jobDetail_Business_UserId_FK);
+                            $objUser = $clsUserData->getUserDataByUserId($objJob->jobDetail_Business_UserId_FK);
                             echo $objUser->userData_Name_Business;
                         }
                         ?>

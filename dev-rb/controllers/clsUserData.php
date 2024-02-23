@@ -97,11 +97,38 @@ class clsUserData
     function attemptLogin($email, $pw) {
         global $wpdb;
 
+        // First Name
+        // Last Name
+        // experience (start date)
+        // jobs done
+        // avg rating (return 0 if null)
+        // bio
+
+        $passKey = md5($pw);
+
         $query = "SELECT userData_WordPress_UserId_FK, userData_Define_Role_Id_FK, userData_Timezone, userData_Primary_Email, userData_Name_First, userData_Name_Last, userData_Name_Business, userData_Profile_Description" .
         " FROM {$this->table}" .
-        " WHERE userData_Primary_Email = '{$email}' AND userData_Password = '{$pw}' LIMIT 1";
+        " WHERE userData_Primary_Email = '{$email}' AND userData_Password = '{$passKey}' LIMIT 1";
         $arrUserData = $wpdb->get_results(
-            $wpdb->prepare($query, [$email, $pw])
+            $wpdb->prepare($query, [$email, $passKey])
+        );
+//        return $arrUserData;
+        if ($arrUserData) {
+            return $arrUserData[0];
+        } else {
+            return $query;
+        }
+    }
+
+    function getEngineerData($engID) {
+        global $wpdb;
+        $query = "ud.userData_Name_First, ud.userData_Name_Last, ud.userData_Experience_Start, COUNT(jd.jobDetail_Id_PK) as jobs_Done, AVG(jr.jobReview_for_Engineer_Rating) as avg_Review, ud.userData_Profile_Description as bio" .
+            " FROM {$this->table} as ud" .
+            " JOIN job_Reviews jf on ud.userData_Id_PK = jr.jobReview_for_Engineer_UserId_FK" .
+            " JOIN job_Details jd on ud.userData_Id_PK = jd.jobDetail_Engineer_UserId_FK" .
+            " WHERE userData_Id_PK = '{$engID}' LIMIT 1";
+        $arrUserData = $wpdb->get_results(
+            $wpdb->prepare($query, [$engID])
         );
 //        return $arrUserData;
         if ($arrUserData) {
@@ -121,9 +148,9 @@ class clsUserData
         $wpdb->insert( $this->table, $data );
     }
 
-    function getUserDataByWPUserId( $intWPUserId ) {
+    function getUserDataByUserId( $intWPUserId ) {
         global $wpdb;
-        $query = "SELECT * FROM {$this->table} WHERE userData_WordPress_UserId_FK = '%s'";
+        $query = "SELECT * FROM {$this->table} WHERE userData_Id_PK = '%s'";
         $arrUserData = $wpdb->get_results(
             $wpdb->prepare($query, [$intWPUserId])
         );

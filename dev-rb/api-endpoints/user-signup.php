@@ -33,7 +33,7 @@ function func_user_register($data) {
         "userData_Id_PK" => $userData_Id_PK,
         "userData_Define_Role_Id_FK" => 'role-business',
         "userData_Primary_Email" => $data['email'],
-        "userData_Password" => $data['pw'],
+        "userData_Password" => md5($data['pw']),
         "userData_Name_Preferred" => $data['first'],
         "userData_Name_First" => $data['first'],
         "userData_Name_Last" => $data['last'],

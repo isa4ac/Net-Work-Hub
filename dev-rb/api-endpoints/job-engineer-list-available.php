@@ -29,7 +29,7 @@ function func_job_engineer_list_available($data) {
             $userData_Name_Business = "";
             if (!empty($objJob->jobDetail_Business_UserId_FK))
             {
-                $objUser = $clsUserData->getUserDataByWPUserId($objJob->jobDetail_Business_UserId_FK);
+                $objUser = $clsUserData->getUserDataByUserId($objJob->jobDetail_Business_UserId_FK);
                 $userData_Name_Business = $objUser->userData_Name_Business;
             }
 
