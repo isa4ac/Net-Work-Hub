@@ -24,20 +24,8 @@ class clsUserData
 
             $userData_Id_PK = $clsNetworkHub->generate_uuid("user-data-");
 
-            $wpUserId = wp_insert_user([
-                'user_pass' => $_POST['password'],
-                'user_login' => $_POST['email'],
-                'user_email' => $_POST['email'],
-                'first_name' => $_POST['userData_Name_First'],
-                'last_name' => $_POST['userData_Name_Last'],
-                'role' => ($_POST['userData_Define_Role_Id_FK'] === "role-business") ? "business" : "engineer"
-            ]);
-
-            update_user_meta($wpUserId, "uuid_key", $userData_Id_PK);
-
             $this->addUserData([
                 "userData_Id_PK" => $userData_Id_PK,
-                "userData_WordPress_UserId_FK" => $wpUserId,
                 "userData_Define_Role_Id_FK" => $_POST['userData_Define_Role_Id_FK'],
                 "userData_Timezone" => $_POST['userData_Timezone'],
                 "userData_Primary_Email" => $_POST['email'],
@@ -50,8 +38,8 @@ class clsUserData
                 "userData_is_Enabled" => "1",
                 "userData_DT_Added" => date("Y-m-d H:i:s")
             ]);
-
-            wp_redirect( add_query_arg(['signup'=>1], get_permalink($post->ID)) );
+            // todo: needed? :
+//            wp_redirect( add_query_arg(['signup'=>1], get_permalink($post->ID)) );
             exit;
         }
 
@@ -128,14 +116,14 @@ class clsUserData
             " JOIN job_Details jd on ud.userData_Id_PK = jd.jobDetail_Engineer_UserId_FK" .
             " WHERE userData_Id_PK = '{$engID}' LIMIT 1";
         $arrUserData = $wpdb->get_results(
-            $wpdb->prepare($query, [$engID])
+            $wpdb->prepare($query)
         );
-//        return $arrUserData;
-        if ($arrUserData) {
-            return $arrUserData[0];
-        } else {
-            return $query;
-        }
+        return $query;
+//        if ($arrUserData) {
+//            return $arrUserData;
+//        } else {
+//            return $query;
+//        }
     }
 
     function get_records() {

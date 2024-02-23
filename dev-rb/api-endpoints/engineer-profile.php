@@ -1,14 +1,14 @@
 <?php
 /*
-*   Endpoint URL: https://app.networkhub.me/wp-json/v1/user-login
+*   Endpoint URL: https://app.networkhub.me/wp-json/v1/engineer-profile
 */
 
 add_action('rest_api_init', function(){
 
     register_rest_route( 'v1', '/engineer-profile', array(
-        'methods' => 'GET',                                 // can be GET, POST, PUT, DELETE
+        'methods' => 'POST',                                 // can be GET, POST, PUT, DELETE
         'callback' => 'func_get_engineer',             // call back function to do the required task
-    ) );
+    ));
 
     // Pass in: Engineer ID : engID
 
@@ -20,6 +20,6 @@ $data parameter holds the parameters being passed to the endpoint.
 function func_get_engineer($data) {
 
     global $clsUserData;
-
-    return $clsUserData->getEngineerData( $data['engID']);
+    return 'test';
+//    return $clsUserData->getEngineerData( $data['engID']);
 }
