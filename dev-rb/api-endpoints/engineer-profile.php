@@ -6,7 +6,7 @@
 add_action('rest_api_init', function(){
 
     register_rest_route( 'v1', '/engineer-profile', array(
-        'methods' => 'POST',                                 // can be GET, POST, PUT, DELETE
+        'methods' => 'GET',                                 // can be GET, POST, PUT, DELETE
         'callback' => 'func_get_engineer',             // call back function to do the required task
     ) );
 
