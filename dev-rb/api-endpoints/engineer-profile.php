@@ -21,7 +21,5 @@ function func_get_engineer($data) {
 
     global $clsUserData;
 
-    $objResponse = $clsUserData->getEngineerData( $data['engID']);
-
-    return $objResponse;
+    return $clsUserData->getEngineerData( $data['engID']);
 }

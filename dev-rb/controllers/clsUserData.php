@@ -122,7 +122,7 @@ class clsUserData
 
     function getEngineerData($engID) {
         global $wpdb;
-        $query = "ud.userData_Name_First, ud.userData_Name_Last, ud.userData_Experience_Start, COUNT(jd.jobDetail_Id_PK) as jobs_Done, AVG(jr.jobReview_for_Engineer_Rating) as avg_Review, ud.userData_Profile_Description as bio" .
+        $query = "SELECT ud.userData_Name_First, ud.userData_Name_Last, ud.userData_Experience_Start, COUNT(jd.jobDetail_Id_PK) as jobs_Done, AVG(jr.jobReview_for_Engineer_Rating) as avg_Review, ud.userData_Profile_Description as bio" .
             " FROM {$this->table} as ud" .
             " JOIN job_Reviews jf on ud.userData_Id_PK = jr.jobReview_for_Engineer_UserId_FK" .
             " JOIN job_Details jd on ud.userData_Id_PK = jd.jobDetail_Engineer_UserId_FK" .
