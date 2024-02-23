@@ -21,7 +21,7 @@ function func_get_engineer($data) {
 
     global $clsUserData;
 
-    $objResponse = $clsUserData->attemptLogin( $data['engID']);
+    $objResponse = $clsUserData->getEngineerData( $data['engID']);
 
     return $objResponse;
 }
