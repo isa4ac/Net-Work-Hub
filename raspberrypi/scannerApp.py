@@ -1,9 +1,12 @@
 from flask import Flask, jsonify
+import mysql.connector
+from mysql.connector import Error
 import re
 import nmap
 import socket
 import uuid
 import subprocess
+import config
 
 app = Flask(__name__)
 
@@ -70,6 +73,32 @@ def host_scan():
 
     return results
 
+def create_connection():
+    """Create a database connection to a MySQL database"""
+    connection = None
+    try:
+        connection = mysql.connector.connect(
+            host = config.host,
+            user = config.username,
+            passwd = config.password,
+            database = config.database
+        )
+        print("Connection to MySQL DB successful")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+
+    return connection
+
+def insert_data(connection, query, values):
+    """Insert data into a table"""
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query, values)
+        connection.commit()
+        print("Query executed successfully")
+    except Error as e:
+        print(f"The error '{e}' occurred")
+
 @app.route('/')
 def index():
     return """
@@ -92,6 +121,20 @@ def hostscan():
         return jsonify(scan_results)
     except Exception as err:
         return jsonify({'error': str(err)}), 500
+
+def insert_Nmap_Data():
+    # Establish a database connection
+    conn = create_connection(host, user, password, database)
+
+    if conn is not None:
+        # Insert data
+        insert_query = "INSERT INTO job_Messages (jobMessage_Id_PK, jobMessage_jobDetail_Id_FK, jobMessage_Sender_UserId_FK, jobMessage_Text) VALUES (%s, %s, %s, %s)"
+        data_to_insert = ('test123', 'jobidtest', 'senderidtest', 'test message')
+
+        insert_data(conn, insert_query, data_to_insert)
+
+        # Close the connection
+        conn.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0') #makes available on local network
