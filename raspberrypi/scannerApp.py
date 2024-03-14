@@ -1,5 +1,5 @@
-from flask import Flask, jsonify
 import re
+import time
 import nmap
 import socket
 import uuid
@@ -8,9 +8,9 @@ import config
 import os
 import mariadb
 import sys
+import requests
 from dotenv import load_dotenv
 
-app = Flask(__name__)
 load_dotenv()
 
 def get_range():
@@ -36,6 +36,7 @@ def get_vpnstatus():
         else:
                 return("inactive")
 
+#returns ip, hostname, state, and port of machines on the network
 def port_scan():
 
     ips = get_range()
@@ -59,11 +60,12 @@ def port_scan():
 
     return results
 
+#returns ips, hostnames, macs, and ports
 def host_scan():
-
+     
     ips = get_range()
     nm = nmap.PortScanner()
-    nm.scan(hosts=ips, arguments='-sn')
+    nm.scan(hosts=ips, arguments='--privileged -sS')
     results = []
 
     for host in nm.all_hosts():
@@ -71,6 +73,18 @@ def host_scan():
                 'ip': host,
                 'hostname': nm[host].hostname()
         }
+
+        #add mac addresses
+        if 'addresses' in nm[host]:
+            addresses = nm[host]['addresses']
+            if 'mac' in addresses:
+                host_data['mac_address'] = addresses['mac']
+
+        #add ports
+        if 'tcp' in nm[host]:
+            host_data['ports'] = list(nm[host]['tcp'].keys())
+        else:
+            host_data['ports'] = []
 
         results.append(host_data)
 
@@ -86,30 +100,21 @@ def insert_data(connection, query, values):
     except Error as e:
         print(f"The error '{e}' occurred")
 
-@app.route('/')
-def index():
-    return """
-    <p>networkHub api</p>
-    """
-
-@app.route('/portscan')
 def portscan():
     try:
         scan_results = port_scan()
-        return jsonify(scan_results)
+        return scan_results
     except Exception as err:
-        return jsonify({'error': str(err)}), 500
+        return {'error': str(err)}, 500
 
-@app.route('/hosts')
 def hostscan():
     try:
         scan_results = host_scan()
-        return jsonify(scan_results)
+        return scan_results
     except Exception as err:
-        return jsonify({'error': str(err)}), 500
+        return {'error': str(err)}, 500
 
-@app.route('/testdb')
-def insert_Nmap_Data():
+def insert_Nmap_Data(data):
 
     try:
         conn = mariadb.connect(
@@ -125,12 +130,11 @@ def insert_Nmap_Data():
         print(f"Error connecting to MariaDB Platform: {e}")
         sys.exit(1)
 
-    # Get Cursor
     cur = conn.cursor()
-
-    #todo make actual insert statement
+    #todo finish query
+    query = "INSERT INTO device_Data (deviceData_Id_PK, deviceData_Address_MAC, deviceData_Address_IP_LAN, ...)
     try: 
-        cur.execute("INSERT INTO job_Messages (jobMessage_Id_PK, jobMessage_jobDetail_Id_FK, jobMessage_Sender_UserId_FK, jobMessage_Text) VALUES ('test123', 'jobidtest', 'senderidtest', 'test message')") 
+        cur.execute(query, data) 
     except mariadb.Error as e: 
         print(f"Error: {e}")
 
@@ -140,5 +144,11 @@ def insert_Nmap_Data():
     conn.close()
     return 'success'
 
+def main():
+     while True:
+          hostscan()
+#timer run this every 7200 seconds
+          time.sleep(7200)
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0') #testing
+    main()
