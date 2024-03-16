@@ -1,5 +1,7 @@
+import hashlib
 import re
-import time
+import datetime
+import time as t
 import nmap
 import socket
 import uuid
@@ -10,8 +12,11 @@ import mariadb
 import sys
 import requests
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
+
+logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 def get_range():
 
@@ -41,80 +46,9 @@ def port_scan():
 
     ips = get_range()
     nm = nmap.PortScanner()
-    nm.scan(hosts=ips, arguments='-A')
-    results = []
-
-    for host in nm.all_hosts():
-        host_data = {
-                'ip': host,
-                'hostname': nm[host].hostname(),
-                'state': nm[host].state()
-        }
-
-        if 'tcp' in nm[host]:
-            host_data['ports'] = list(nm[host]['tcp'].keys())
-        else:
-            host_data['ports'] = []
-
-        results.append(host_data)
-
-    return results
-
-#returns ips, hostnames, macs, and ports
-def host_scan():
-     
-    ips = get_range()
-    nm = nmap.PortScanner()
     nm.scan(hosts=ips, arguments='--privileged -sS')
-    results = []
 
-    for host in nm.all_hosts():
-        host_data = {
-                'ip': host,
-                'hostname': nm[host].hostname()
-        }
-
-        #add mac addresses
-        if 'addresses' in nm[host]:
-            addresses = nm[host]['addresses']
-            if 'mac' in addresses:
-                host_data['mac_address'] = addresses['mac']
-
-        #add ports
-        if 'tcp' in nm[host]:
-            host_data['ports'] = list(nm[host]['tcp'].keys())
-        else:
-            host_data['ports'] = []
-
-        results.append(host_data)
-
-    return results
-
-def insert_data(connection, query, values):
-    """Insert data into a table"""
-    cursor = connection.cursor()
-    try:
-        cursor.execute(query, values)
-        connection.commit()
-        print("Query executed successfully")
-    except Error as e:
-        print(f"The error '{e}' occurred")
-
-def portscan():
-    try:
-        scan_results = port_scan()
-        return scan_results
-    except Exception as err:
-        return {'error': str(err)}, 500
-
-def hostscan():
-    try:
-        scan_results = host_scan()
-        return scan_results
-    except Exception as err:
-        return {'error': str(err)}, 500
-
-def insert_Nmap_Data(data):
+    allports = []
 
     try:
         conn = mariadb.connect(
@@ -123,32 +57,107 @@ def insert_Nmap_Data(data):
             host=os.environ.get('DB_HOST'),
             port=int(os.environ.get('DB_PORT')),
             database=os.environ.get('DB_NAME')
-
         )
 
-    except mariadb.Error as e:
-        print(f"Error connecting to MariaDB Platform: {e}")
+    except mariadb.Error as err:
+        print(f"Error connecting to database: {err}")
         sys.exit(1)
 
     cur = conn.cursor()
-    #todo finish query
-    query = "INSERT INTO device_Data (deviceData_Id_PK, deviceData_Address_MAC, deviceData_Address_IP_LAN, ...)
-    try: 
-        cur.execute(query, data) 
-    except mariadb.Error as e: 
-        print(f"Error: {e}")
 
-    conn.commit() 
-    print(f"Last Inserted ID: {cur.lastrowid}")
-    
+    for host in nm.all_hosts():
+
+        #get open ports
+        if 'tcp' in nm[host]:
+            for port, port_info in nm[host]['tcp'].items():
+                port_number = port
+
+                #get mac address
+                if 'addresses' in nm[host]:
+                    addresses = nm[host]['addresses']
+                    if 'mac' in addresses:
+                        host_mac_address = addresses['mac']
+
+                hashthis = f'{host_mac_address}{port_number}'
+                result = hashlib.md5(hashthis.encode())
+                macporthash = (result.hexdigest())
+
+                allports.append((macporthash, host_mac_address, port_number))
+        else:
+            port_number = []
+
+    for macporthash, macaddress, portnumber in allports:
+        try:
+            cur.execute(f"INSERT INTO ports (port_id, port_number, host_mac_address_FK) VALUES ('{macporthash}', '{portnumber}', '{macaddress}')")
+        except mariadb.Error as err:
+            print(f"Error: {err}")
+
+        conn.commit()
+    conn.close()
+    return 'success'
+
+#returns ips and hostnames (if found) on network
+def host_scan():
+
+    ips = get_range()
+    nm = nmap.PortScanner()
+    nm.scan(hosts=ips, arguments='--privileged -sS')
+
+    #connect to db
+    try:
+        conn = mariadb.connect(
+            user=os.environ.get('DB_USER'),
+            password=os.environ.get('DB_PASS'),
+            host=os.environ.get('DB_HOST'),
+            port=int(os.environ.get('DB_PORT')),
+            database=os.environ.get('DB_NAME')
+        )
+
+    except mariadb.Error as err:
+        print(f"Error connecting to database: {err}")
+        sys.exit(1)
+
+    #get cursor for db writing
+    cur = conn.cursor()
+
+    for host in nm.all_hosts():
+
+        host_ip = host
+        host_name = nm[host].hostname()
+        #add mac addresses
+        if 'addresses' in nm[host]:
+            addresses = nm[host]['addresses']
+            if 'mac' in addresses:
+                host_mac_address = addresses['mac']
+
+        insertquery = f"INSERT INTO hosts (host_name, host_ip_address, host_mac_address, deviceData_Id_FK) VALUES ('{host_name}', '{host_ip}', '{host_mac_address}', '{os.environ.get('PI_UUID')}')"
+        try:
+            cur.execute(insertquery)
+        except mariadb.Error as err:
+            print(f"Error: {err}")
+
+        updatequery = f"UPDATE hosts SET host_name = '{host_name}', host_ip_address = '{host_ip}' WHERE deviceData_Id_FK= '{os.environ.get('PI_UUID')}' AND host_mac_address = '{host_mac_address}'"
+        try:
+            cur.execute(updatequery)
+        except mariadb.Error as err:
+            print(f"Error: {err}")
+
+        conn.commit()
     conn.close()
     return 'success'
 
 def main():
+
+     time = datetime.datetime.now()
      while True:
-          hostscan()
-#timer run this every 7200 seconds
-          time.sleep(7200)
+        host_scan()
+        logging.debug(f'{time}: hosts input complete')
+        t.sleep(15)
+        logging.debug(f'{time}: starting ports input')
+        port_scan()
+        logging.debug(f'{time}: updates complete')
+        logging.debug(f'{time}: sleeping for 7200 seconds...')
+        t.sleep(7200)
 
 if __name__ == '__main__':
     main()
